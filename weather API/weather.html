@@ -1,0 +1,94 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    </script>
+</head>
+
+<body>
+    <form>
+        <input type="radio" name="datetype" value="weather" class="radioBtn" id="current">Current</br>
+        <input type="radio" name="datetype" value="forecast" class="radioBtn" id="forecast">Forecast
+        <br>
+        <select id="selectList" name="city">
+            <option value="default">please select city</option>
+            <option value="vancouver">Vancouver</option>
+            <option value="montreal">Montreal</option>
+            <option value="toronto">Toronto</option>
+        </select>
+    </form>
+    <div id="container">
+        <div id="name"></div>
+        <div id="time"></div>
+        <div id="description"></div>
+        <div id="temp"></div>
+        <div id="furture"></div>
+    </div>
+</body>
+<script>
+    var getResult = function (_datetype, _city) {
+            $.ajax({
+                url: 'http://api.openweathermap.org/data/2.5/' + _datetype + '?q=' + _city + ',ca&appid=45f66152a00114f350e710c755393ba8',
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+
+                    if (_datetype === 'weather') {
+                        $("#name").text("Name: " + response.name);
+                        var myDate = new Date(parseInt(response.dt) * 1000);
+                        $("#time").text("Time: " + myDate.toLocaleString());
+                        $("#description").text("Description: " + response.weather[0].description);
+                        var kelvin = parseFloat(response.main.temp); //kelvin is 291.14
+                        var celsius = (kelvin - 273.15).toFixed(2); // I dont know why the result is 17.99000000000001 if I dont use toFixed()
+                        $("#temp").text("Temperature: " + celsius);
+                    } else {
+                        var n = 0;
+                        response.list.forEach(element => {
+                            var getDate = new Date(element.dt * 1000);
+                            console.log(getDate.getHours()); //number change 1 because of winter or summer time
+                            if (getDate.getHours() == '16' && n < 3) {
+                                $("#temp").text(response.city.name );
+                                $("#furture").append("Name: " + response.city.name + "</br>");
+                                var kelvin2 = parseFloat(element.main.temp);
+                                var celsius2 = (kelvin2 - 273.15).toFixed(2);
+                                $("#furture").append("Temperature: " + celsius2 + "</br>");
+                                $("#furture").append("Weather: " + element.weather[0].description + "</br>" + "</br>");
+                                n++;
+                            }
+                        });
+                    }
+
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+    }
+    $(document).ready(function () {
+        //radio button changed
+        $(".radioBtn").change(function () {
+            $("#selectList").val( "default");
+            //var checkValue = $("#select_id").val();                    // 2.获取Select选中项的Value  
+            //var checkText = $("#select_id :selected").text();          // 3.获取Select选中项的Text 
+            $("#name").empty();
+            $("#time").empty();
+            $("#description").empty();
+            $("#temp").empty();
+            $("#furture").empty();
+        });
+
+        // get result
+        $("#selectList").change(function () {
+            //if($("#current").prop('checked'))
+            var isChecked = $('.radioBtn:checked').val();
+            var selectedJob = $("#selectList").val();
+            if (selectedJob !== 'default') {
+                getResult(isChecked, selectedJob);
+            }
+        });
+    });
+
+</script>
+
+</html>
