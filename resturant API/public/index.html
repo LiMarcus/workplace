@@ -1,0 +1,81 @@
+<htmL>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+</head>
+
+<body>
+    <header>Cuisine</header>
+    <select id="cuisine">
+        <option value="italian">Italian</option>
+        <option value="mexican">Mexican</option>
+        <option value="chinese">Chinese</option>
+        <option value="japanese">Japanese</option>
+    </select>
+    <header>Sort By</header>
+    <select id="sort_by">
+        <option value="best_match">Best Match</option>
+        <option value="rating">Rating</option>
+        <option value="review_count">Review Count</option>
+    </select>
+    <header>Price Filter</header>
+    <select id="price_filter">
+        <option value="1">Inexpensive</option>
+        <option value="2">Moderate</option>
+        <option value="3">Pricey</option>
+        <option value="4">Ultra High-End</option>
+    </select>
+    <br/>
+    <button id="submit">Submit</button>
+    <div>
+        <ul id="restaurant"></ul>
+    </div>
+</body>
+<script>
+    $(document).ready(function () {
+        $('#submit').click(function () {
+            var cuisine = $('#cuisine').val();
+            var sort_by = $('#sort_by').val();
+            var price_filter = $('#price_filter').val();
+            $('#restaurant').empty();
+            $.ajax({
+                url: 'http://localhost:3000/restaurants/' + cuisine + '?sort_by=' + sort_by + '&price_filter=' + price_filter,
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    for (var i = 0; i < 8; i++) {
+                        $('#restaurant').append('<li id="' + i + '_name" >' + response.businesses[i].name + '  <a class="review"  id = "' + response.businesses[i].id + '"  href = "#" >see reviews</a></li>');
+                        $('#' + response.businesses[i].id).click(function (event) {
+                            $.ajax({
+                                url: 'http://localhost:3000/reviews/' + event.target.id,
+                                type: 'GET',
+                                dataType: 'json',
+                                success: function (res) {
+                                    console.log(res);
+                                    $('.show_review').empty();   /// empty other reviews 
+                                    var a = $('#' + event.target.id).text();
+                                    if (a == "close reviews") {
+                                        $('#' + event.target.id).text("see reviews"); // change to close reviews
+                                    } else {
+                                        $('.review').text("see reviews");
+                                        res.reviews.forEach(function (unv) {
+                                            $('#' + event.target.id).after('<p class = "show_review">' + unv.text + '</p>');
+                                        });
+                                        $('#' + event.target.id).text("close reviews"); // change to close reviews
+                                    }
+                                },
+                                error: function (err) {
+                                    console.log(err);
+                                }
+                            });
+                        });
+                    }
+                },
+                error: function (err) { console.log(err); }
+            });
+        });
+
+    });
+</script>
+
+</htmL>
