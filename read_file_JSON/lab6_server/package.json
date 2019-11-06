@@ -1,0 +1,11 @@
+{
+  "name": "midterm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "Edmund Leng",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
